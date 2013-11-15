@@ -1,0 +1,71 @@
+CODE author = 'kaliberto@appirio.com (Kristin Aliberto)'
+Create a Drive API application Key:
+1. Login to the target Google Apps Admin Console
+2. Access the Google APIs Console: https://code.google.com/apis/console 
+3. Click the project droplist on the left and select Create
+4. Name the Project: Fringe > click Create Project
+5. Select Services > Enable Drive API > accept the Terms
+6. Select API Access > click Create an OAuth 2.0 client ID
+ a. Project Name: type Fringe > click Next > 
+ b. Client ID Settings: select Service account > click Create Client ID
+ c. Public-Private Key Pair Generated: click Download private key
+ d. Click the “X” in the upper-right of the Public-Private Key Pair screen
+7. Take note of the Client ID and the Email Address:
+ a. Client ID: nnnnnnnnnnn.apps.googleusercontent.com
+ b. Email address: nnnnnnnnnnn@developer.gserviceaccount.com
+
+Prepare 3rd Party OAuth Client Access
+Note: You will want to add additional scopes based on the API(s) called.  A read-only list of APIs and scopes can be found in a Google Spreadsheet called ListActions
+1. Admin Console > Security > Manage 3rd Party OAuth Client Access
+ a. Client Name:	nnnnnnnnnnn.apps.googleusercontent.com
+ b. Drive API Scope: https://www.googleapis.com/auth/drive
+
+Prepare your Mac for “fringe”
+1. Install Xcode 
+ a. Open browser to download and install [xcode]
+ b. Start Xcode to complete the installation
+2. From Terminal, create a “fringe” directory
+ a. $ mkdir /Users/[username]/fringe
+3. From Terminal, install the “Google API Python client” and “Python keyring module”
+ a. $ sudo easy_install --upgrade google-api-python-client
+ b. $ sudo easy_install keyring
+4. Open browser to download fringe: [fringe2b.py] or [fringe.py]
+ a. Save the file into a local folder (i.e. /Users/[username]/fringe)
+
+Usage: (example query of owned drive files and not drive folders)
+python fringe.py id=[clientID] key=[privatekey.p12] oauth=service-file domain=[target domain name] print=False service=Drive.Files action=list parameters="q= 'me' in owners AND mimeType != 'application/vnd.google-apps.folder';fields=items(id,labels,lastModifyingUser,modifiedDate,quotaBytesUsed,shared,title),nextPageToken" prn=bill.reed@appirio-dev1.com
+
+Example Bash Script
+This can be executed for multiple people when executed as a bash script fed by a csv files.  The example below reads a csv file with email addresses to query.  $ sh OwnedFiles.sh
+
+From Terminal, create a bash file:
+$ nano OwnedFiles.sh
+
+# Then paste the following into the file. Save > CTRL+O Exit CTRL+X
+#!/bin/bash
+while read UserID
+do
+python fringe.py id=723535602580-pvosipke25ifr0gkvg0flt5ddq8jlb86@developer.gserviceaccount.com key=af4a38232db7cbfddf6b5580089255d9e6b574a2-privatekey.p12 oauth=service-file domain=appirio-dev1.com print=False service=Drive.Files action=list parameters="q= 'me' in owners AND mimeType != 'application/vnd.google-apps.folder';fields=items(id,labels,lastModifyingUser,modifiedDate,quotaBytesUsed,shared,title),nextPageToken" prn=$UserID
+done < userList.csv
+
+Fringe2b.py Usage:
+usage: fringe.py [-h] [--file FILE] [--printout PRINTOUT]
+                 [--connections CONNECTIONS] [--retryattempts RETRYATTEMPTS]
+                 [--oauth OAUTH] [--parameters PARAMETERS]
+                 [--file_parameters FILE_PARAMETERS] [--api_id API_ID]
+                 [--api_key API_KEY] [--domain DOMAIN] [--service SERVICE]
+                 [--action ACTION] [--prn PRN] [--body BODY]
+                 [--combine COMBINE]
+
+***Need to write-up several examples****
+python fringe2b.py \
+--file userList.csv \
+--printout False \
+--oauth service-file \
+--parameters "q= 'me' in owners AND mimeType != 'application/vnd.google-apps.folder';fields=items(id,labels,lastModifyingUser,modifiedDate,quotaBytesUsed,shared,title),nextPageToken" \
+--api_id 723535602580-pvosipke25ifr0gkvg0flt5ddq8jlb86@developer.gserviceaccount.com \
+--api_key af4a38232db7cbfddf6b5580089255d9e6b574a2-privatekey.p12 \
+--domain appirio-dev1.com \
+--service Drive.Files \
+--action list \
+--prn $UserID
